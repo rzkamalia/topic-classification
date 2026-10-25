@@ -26,7 +26,7 @@ The trained models are available on [Google Drive](https://drive.google.com/driv
     │   ├── news_val.csv
     │   └── news_test.csv
     └── artifacts/
-        ├── distilbert-base/       # Model checkpoint and training outputs
+        ├── distilbert-base/      # Model checkpoint and training outputs
         ├── modernbert-base/      # Model checkpoint and training outputs
         └── evaluation/           # Individual and ensemble evaluation results
 ```
