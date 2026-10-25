@@ -1,0 +1,10 @@
+{
+  "model_dir": "/workspace/artifacts/modernbert-base/best_model",
+  "test_csv": "/workspace/data/news_test.csv",
+  "rows": 11425,
+  "batch_size": 8,
+  "max_length": 312,
+  "device": "cuda",
+  "precision": "float32",
+  "macro_f1_labels": "all_saved_labels"
+}

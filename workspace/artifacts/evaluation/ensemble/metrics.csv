@@ -1,0 +1,2 @@
+total_articles,auto_tagged,human_review,correct_auto_tags,incorrect_auto_tags,automation_coverage,selective_risk,auto_tag_precision,human_review_rate
+11425,9615,1810,8415,1200,0.8415754923413566,0.12480499219968799,0.875195007800312,0.15842450765864333
