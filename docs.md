@@ -5,7 +5,7 @@
 - **Objective:** Automate news topic classification while retaining human review for uncertain predictions.
 - **Approach:** Agreement-based ensemble learning using two independently fine-tuned BERT-based Transformer models.
 - **Automatic Tagging:** Assign a topic when both models predict the same category.
-- **Human Review:** Route articles to editors when the models disagree.
+- **Human Review:** Flag articles for editorial review when the models disagree; connecting this flag to an editor queue is a deployment step.
 - **Priority:** Minimize incorrect tags in live topic feeds, even at the cost of lower automation coverage.
 
 ## 2. Dataset and Preprocessing
@@ -30,11 +30,12 @@
 
 - Normalize empty strings, whitespace-only values, and literal `"null"` values into missing values.
 - Remove duplicate headline-description pairs and records with conflicting category labels.
-- **Limitation:** Missing metadata may cause valid articles to be excluded, potentially introducing selection bias.
+- **Limitation:** The current `dropna()` removes records with missing values in any column, including `authors`, even though only headline and description are model inputs. This can exclude valid articles and introduce selection bias. A follow-up experiment should require only headline, description, and category to be present.
 
 ### 2.3 Data Splitting
 
 - **Method:** Stratified random splitting to preserve category proportions despite class imbalance.
+- **Reproducibility:** Both split operations use `random_state=42`. Duplicate and conflicting normalized headline-description pairs are handled before splitting to prevent identical pairs from crossing splits.
 
     | Dataset | Proportion |
     |---|---:|
@@ -42,7 +43,7 @@
     | Validation | 20% |
     | Testing | 10% |
 
-- **Limitation:** Random splitting does not directly measure generalization to future news articles.
+- **Limitation:** Random splitting does not directly measure generalization to future news articles. Related stories and near-duplicates may still appear across splits, and editorial categories may change over time.
 
 ## 3. Model Training
 
@@ -71,6 +72,7 @@
 - Fine-tune both models independently using the same training and validation datasets.
 - Tokenize using each model's corresponding pretrained tokenizer.
 - Select the best checkpoint using validation Macro F1-score.
+- Use only the supplied News Category Dataset for supervised training, initialized from pretrained model weights.
 
 | Metric | Purpose |
 |---|---|
@@ -90,7 +92,9 @@
 
 - ModernBERT and DistilBERT independently classify each article.
 - **Agreement:** Automatically assign the predicted category.
-- **Disagreement:** Route the article to human review.
+- **Disagreement:** Return `category=None` and `requires_human_review=True`. The notebook produces a routing flag; it does not yet submit work to an editor queue.
+- Both models are loaded once. Each uses its own saved tokenizer and input length limit, and predictions are compared by category name.
+- Softmax scores are returned for inspection, but no confidence threshold or calibration is currently used in the routing decision. Even low-confidence agreement is accepted by the current policy.
 - Model agreement is used as a reliability signal, but does not guarantee correctness.
 
 ### 4.2 Example
@@ -113,7 +117,8 @@ Both models were evaluated on the same **11,425 test articles**.
 | Test Loss | 0.6612 | **0.6190** |
 | Test Accuracy | **80.25%** | 80.07% |
 | Test Macro F1 | 0.7389 | **0.7492** |
-| Evaluation Time | **18 s** | 48 s |
+
+The saved evaluation records confirm GPU use. Evaluation times are excluded because the previously reported durations could not be verified from those records. A follow-up benchmark should measure processing time on specified hardware.
 
 - DistilBERT achieves slightly higher accuracy.
 - ModernBERT achieves higher Macro F1.
@@ -139,10 +144,22 @@ Both models were evaluated on the same **11,425 test articles**.
 - **Auto-tag Precision:** 87.52% of automatically tagged articles are correctly classified.
 - **Selective Risk:** 12.48% of automatically tagged articles receive incorrect tags.
 - **Human Review Rate:** 15.84% of articles require editorial review.
-- Agreement-based routing improves correctness among automatically tagged articles compared with tagging all articles using either individual classifier.
+- Auto-tag precision is calculated only for automatically tagged articles; individual model accuracy is calculated for all test articles.
 
 **Editorial Risk Assessment**
 
-- Incorrect automatic tags remain a concern: 1,200 articles were incorrectly tagged despite model agreement.
-- Model agreement does not guarantee a correct prediction.
-- The observed selective risk must be assessed against editorial requirements before production deployment.
+- Both models agreed on 1,200 incorrect tags (12.48% of automatic tags). A stricter acceptance policy is needed before automatic publishing.
+
+## 6. Hardware
+
+Training was performed on a rented Vast.ai instance with the following specifications:
+
+- **GPU:** NVIDIA GeForce RTX 3060, 12 GB VRAM
+- **CPU:** 8 cores
+- **RAM:** 96.4 GB
+- **Container disk:** 32 GB
+
+## 7. Next Steps
+
+1. Review overlapping categories such as PARENTS and PARENTING with editors. Merge them only if they represent the same editorial topic; otherwise, clarify their definitions to support consistent labeling.
+2. Benchmark the ensemble against LLM API-based services such as OpenAI or JEV, comparing cost per 1,000 articles and estimated monthly cost, alongside prediction quality and response time.
