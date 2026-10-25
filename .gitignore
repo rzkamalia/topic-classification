@@ -12,3 +12,6 @@ wheels/
 
 .hf_home
 .ipynb_checkpoints
+
+workspace/artifacts/distilbert-base/
+workspace/artifacts/modernbert-base/

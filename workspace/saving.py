@@ -2,9 +2,8 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from sklearn.metrics import confusion_matrix, precision_score
-
 from model import model_loading_options
+from sklearn.metrics import confusion_matrix, precision_score
 
 
 def write_json(path, values):

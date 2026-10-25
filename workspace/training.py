@@ -5,10 +5,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
-from sklearn.metrics import accuracy_score, f1_score
-from torch.utils.data import DataLoader, Dataset
-from transformers import DataCollatorWithPadding, get_linear_schedule_with_warmup
-
 from model import (
     get_device,
     get_input_limit,
@@ -22,6 +18,9 @@ from saving import (
     save_test_results,
     save_training_setup,
 )
+from sklearn.metrics import accuracy_score, f1_score
+from torch.utils.data import DataLoader, Dataset
+from transformers import DataCollatorWithPadding, get_linear_schedule_with_warmup
 
 
 def set_seed(seed):

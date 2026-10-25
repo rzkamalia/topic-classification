@@ -3,9 +3,6 @@ from pathlib import Path
 
 import pandas as pd
 import torch
-from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score
-from tqdm.auto import tqdm
-
 from model import (
     get_device,
     get_input_limit,
@@ -13,6 +10,8 @@ from model import (
     load_saved_model,
     resolve_model_dir,
 )
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score
+from tqdm.auto import tqdm
 
 
 @torch.inference_mode()

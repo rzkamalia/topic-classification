@@ -1,5 +1,9 @@
 # News Topic Classification
 
+## Model Checkpoints
+
+The trained models are available on [Google Drive](https://drive.google.com/drive/folders/1b5aYvqh6QtxfGy7UotBfUH48gEqqaLHf?usp=sharing).
+
 ## Repository Structure
 
 ```text
