@@ -15,3 +15,4 @@ wheels/
 
 workspace/artifacts/distilbert-base/
 workspace/artifacts/modernbert-base/
+workspace/data/News_Category_Dataset_v3.json
